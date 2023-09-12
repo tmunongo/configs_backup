@@ -41,6 +41,21 @@ def autostart():
 mod = "mod4"
 terminal = guess_terminal()
 
+# Define your Catpuccino color scheme as a dictionary
+catpuccino_colors = {
+    "background": "#1E1E2E",
+    "background2": "#81A1C1",
+    "background2pale": "#ADC2D7",
+    "foreground": "#CAA9E0",
+    "accent1": "#353446",
+    "accent2": "#ff0000",
+    "accent3": "#ffffff",
+    "accent4": "#9E4827"
+}
+
+# Define the transparency level (alpha channel) for the background color
+transparency_level = 150  # You can adjust this value as needed
+
 keys = [
     # A list of available commands that can be bound to keys can be found
     # at https://docs.qtile.org/en/latest/manual/config/lazy.html
@@ -82,7 +97,6 @@ keys = [
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 
     ## CUSTOM
-
     Key([mod], "d", lazy.spawn("rofi -show drun"), desc="Launch rofi"),
     Key([mod, "shift"], "e", lazy.spawn("rofi -show power-menu -modi power-menu:rofi-power-menu"), desc="Launch power menu"),
     Key([], "XF86AudioRaiseVolume", lazy.spawn("pactl set-sink-volume 0 +5%"), desc='Volume Up'),
@@ -124,8 +138,8 @@ for i in groups:
         ]
     )
 # layout variables
-focus_stack_A= '#d75f5f'
-focus_stack_B = '#8f3d3d'
+focus_stack_A = catpuccino_colors["background"]
+focus_stack_B = catpuccino_colors["foreground"]
 var_gap_top = 5
 var_gap_bottom = 5
 var_gap_left = 5
@@ -134,7 +148,9 @@ var_margin=[5,5,5,5]
 
 layouts = [
     layout.Columns(
-        border_focus_stack=[focus_stack_A, focus_stack_B], 
+        border_focus_stack=[catpuccino_colors["foreground"], catpuccino_colors["background2"]], 
+        border_focus = catpuccino_colors["foreground"],
+        border_normal = catpuccino_colors['background'],
         border_width=4, 
         margin=var_margin,
     ),
@@ -159,15 +175,6 @@ widget_defaults = dict(
 )
 extension_defaults = widget_defaults.copy()
 
-# Define your Catpuccino color scheme as a dictionary
-catpuccino_colors = {
-    "background": "#0C202Baa",
-    "foreground": "#CAA9E0",
-    "accent1": "#353446",
-    "accent2": "#ff0000",
-    "accent3": "#ffffff",
-    "accent4": "#9E4827"
-}
 
 # Define Nerd Fonts icon for the battery
 nf_icons = {
@@ -181,33 +188,33 @@ class MyVolume(widget.Volume):
         widget.Volume._configure(self, qtile, bar)
         self.volume = self.get_volume()
         if self.volume <= 0:
-            self.text = '婢 '
+            self.text = ' 婢 '
         elif self.volume <= 33:
-            self.text = ' '
+            self.text = '  '
         elif self.volume < 66:
-            self.text = '墳 '
+            self.text = ' 墳 '
         else:
             self.text = '  '
  
     def _update_drawer(self, wob=False):
         if self.volume <= 0:
-            self.text = '婢 '
+            self.text = ' 婢 '
         elif self.volume <= 33:
-            self.text = ' '
+            self.text = '  '
         elif self.volume < 66:
-            self.text = '墳 '
+            self.text = ' 墳 '
         else:
-            self.text = ' '
+            self.text = '  '
         self.draw()
  
         if wob:
             with open(self.wob, 'a') as f:
-                 f.write(str(self.volume) + "\n")
+                 f.write(str( self.volume) + "\n")
 
 
 # Functions
 volume = MyVolume(
-    format = '{percent:2.0%} {}',
+    format = '{percent:2.0%} {char}',
     fontsize = 15,
     padding=2,
     font="JetBrainsMonoExtraBold Nerd Font",
@@ -257,7 +264,7 @@ class MyBattery(Battery):
  
  
 battery = MyBattery(
-    format='{percent:2.0%} {char} ',
+    format='{char} {percent:2.0%} ',
     low_foreground=catpuccino_colors["accent2"],
     show_short_text=False,
     low_percentage=0.25,
@@ -270,8 +277,6 @@ battery = MyBattery(
     margin=[1,1,1,1]
 )
 
-# Define the transparency level (alpha channel) for the background color
-transparency_level = 150  # You can adjust this value as needed
 
 # Calculate the background color with transparency
 background_color = f"{catpuccino_colors['background']}{transparency_level:02X}"
@@ -286,10 +291,10 @@ screens = [
                     active=catpuccino_colors["foreground"],
                     inactive=catpuccino_colors["accent1"],
                     highlight_method="line",
-                    this_current_screen_border=catpuccino_colors["accent2"],
+                    this_current_screen_border=catpuccino_colors["foreground"],
                     this_screen_border=catpuccino_colors["accent1"],
-                    other_current_screen_border=catpuccino_colors["accent2"],
-                    other_screen_border=catpuccino_colors["accent1"],
+                    other_current_screen_border=catpuccino_colors["foreground"],
+                    other_screen_border=catpuccino_colors["background2"],
                 ),
                 widget.Prompt(),
                 widget.Sep(
@@ -300,7 +305,8 @@ screens = [
                 ),
                 widget.Memory(
                     background=catpuccino_colors["foreground"],
-                    foreground=catpuccino_colors['accent1']
+                    foreground=catpuccino_colors['accent1'],
+                    measure_mem='G'
                 ),
                 widget.Sep(
                     background=catpuccino_colors["background"],
@@ -331,15 +337,33 @@ screens = [
                     name_transform=lambda name: name.upper(),
                 ),
                 widget.Systray(),
-                widget.Backlight(backlight_name='intel_backlight'),
+                widget.Sep(
+                    background=catpuccino_colors["background"],
+                    foreground=catpuccino_colors["background"],
+                    linewidth=10,
+                    size_percent=100
+                ),
+                widget.Backlight(
+                    backlight_name='intel_backlight',
+                    background=catpuccino_colors["foreground"],
+                    foreground=catpuccino_colors["accent1"]
+                ),
+                widget.Sep(
+                    background=catpuccino_colors["background"],
+                    foreground=catpuccino_colors["background"],
+                    linewidth=10,
+                    size_percent=100
+                ),
                 # widget.Wlan(format='{essid} {percent:2.0%}', foreground=catpuccino_colors["foreground"]),
                 widget.Clock(
                     format="%Y-%m-%d %a %I:%M %p", 
-                    foreground=catpuccino_colors["accent3"],
-                    background=catpuccino_colors["accent4"],
-                    margin=[4,0,0,4]
+                    foreground=catpuccino_colors["accent1"],
+                    background=catpuccino_colors["foreground"],
                 ),
-                widget.QuickExit(),
+                widget.QuickExit(
+                    default_text='\u23fb',
+                    padding=12
+                ),
             ],
             34,
             background=catpuccino_colors['background'],
