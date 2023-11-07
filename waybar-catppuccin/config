@@ -1,0 +1,84 @@
+{
+    "modules-left": ["custom/zypper", "custom/launcher","sway/workspaces", "sway/mode"],
+    "modules-center": ["sway/window","clock", "idle_inhibitor"],
+    /* "modules-right": ["tray", "custom/scratchpad-indicator", "pulseaudio", "custom/power"], */
+    "modules-right": ["custom/scratchpad-indicator","network","cpu","memory","temperature","backlight", "pulseaudio","battery","bluetooth", "tray"],
+
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>"
+    },
+    "bluetooth": {
+        
+    },
+    "network": {
+        "format-wifi": "({signalStrength}%) ",
+        "format-ethernet": "{ifname} ",
+        "format-disconnected": "", 
+        "max-length": 50,
+        "on-click": "alacritty -e 'nmtui'"
+    },
+    "cpu": {
+        "on-click": "alacritty -e htop"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        },
+		"on-click": "toggleRemote"
+    },
+    "tray": {
+        "icon-size": 15,
+        "spacing": 10
+    },
+    "custom/zypper": {
+        "format": "{} <U+F187>",
+        "interval": 3600,
+        "exec": "zypper lu | grep 'v |' | wc -l; echo 'packages to update'",
+        "exec-if": "exit 0",
+        "on-click": "exec alacritty -e sudo sh -c 'zypper ref; zypper dup; pkill -SIGRTMIN+8 waybar'",
+        "signal": 8
+    },
+    "clock": {
+        // "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        // "format-alt": "{:%Y-%m-%d}"
+		"on-click": "gnome-calendar"
+    },
+    "pulseaudio": {
+        "format": "{volume}% {icon} ",
+        "format-bluetooth": "{volume}% {icon} {format_source}",
+        "format-bluetooth-muted": " {icon} {format_source}",
+        "format-muted": "0% {icon} ",
+        "format-source": "{volume}% ",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+    "custom/launcher":{
+        "format": " ",
+        "on-click": "rofi -show drun",
+        "on-click-right": "killall rofi"
+    },
+	"custom/power": {
+		"format": " ",
+		"on-click": "swaynag -t warning -m 'Power Menu Options' -b 'Logout' 'swaymsg exit' -b 'Restart' 'shutdown -r now' -b 'Shutdown'  'shutdown -h now' --background=#005566 --button-background=#009999 --button-border=#002b33 --border-bottom=#002b33"
+	},
+    "custom/scratchpad-indicator": {
+        "format-text": "{}",
+        "return-type": "json",
+        "interval": 3,
+        "exec": "~/.local/bin/scratchpad-indicator 2> /dev/null",
+        "exec-if": "exit 0",
+        "on-click": "swaymsg 'scratchpad show'",
+        "on-click-right": "swaymsg 'move scratchpad'"
+    }
+}
